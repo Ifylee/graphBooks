@@ -1,6 +1,5 @@
 const { User } = require('../models');
 const { signToken, AuthenticationError } = require('../utils/auth');
-const { validationResult } = require('express-validator');
 
 const resolvers = {
   Query: {
@@ -16,25 +15,13 @@ const resolvers = {
   },
 
   Mutation: {
-    addUser: async (parent, { username, email, password }, context) => {
-      // Validate input
-      const errors = validationResult(context.req);
-      if (!errors.isEmpty()) {
-        throw new AuthenticationError(errors.array().map(err => err.msg).join(", "));
-      }
-
-      const user = await User.create({ username, email, password });
+    addUser: async (parent, args) => {
+      const user = await User.create(args);
       const token = signToken(user);
+
       return { token, user };
     },
-
-    login: async (parent, { email, password }, context) => {
-      // Validate input
-      const errors = validationResult(context.req);
-      if (!errors.isEmpty()) {
-        throw new AuthenticationError(errors.array().map(err => err.msg).join(", "));
-      }
-      
+    login: async (parent, { email, password }) => {
       const user = await User.findOne({ email });
 
       if (!user) {
