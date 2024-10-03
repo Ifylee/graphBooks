@@ -1,9 +1,12 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
 // Import the ApolloServer class
 const { ApolloServer } = require('@apollo/server');
 const { expressMiddleware } = require('@apollo/server/express4');
 const { authMiddleware } = require('./utils/auth');
+const { body, validationResult } = require('express-validator');
 
 // Import the two parts of a GraphQL schema
 const { typeDefs, resolvers } = require('./schemas');
@@ -17,6 +20,9 @@ const server = new ApolloServer({
 
 const app = express();
 
+// Enable CORS
+app.use(cors());
+
 // Create a new instance of an Apollo server with the GraphQL schema
 const startApolloServer = async () => {
   await server.start();
@@ -24,9 +30,15 @@ const startApolloServer = async () => {
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
   
-  app.use('/graphql', expressMiddleware(server, {
-    context: authMiddleware
-  }));
+  // Add validation and sanitization for the GraphQL mutations
+  app.use('/graphql',
+    body('username').isString().isLength({ min: 3 }).withMessage('Username must be at least 3 characters long'),
+    body('email').isEmail().withMessage('Invalid email address'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+    expressMiddleware(server, {
+      context: authMiddleware
+    })
+  );
 
   if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, '../client/dist')));
@@ -43,6 +55,12 @@ const startApolloServer = async () => {
     });
   });
 };
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  await db.close();
+  process.exit(0);
+});
 
 // Call the async function to start the server
 startApolloServer();
