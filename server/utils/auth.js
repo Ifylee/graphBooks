@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { GraphQLError } = require('graphql');
+
 const secret = 'mysupersecret';
-const expiration = '2h';
+const expiration = '5h';
 
 module.exports = {
   AuthenticationError: new GraphQLError('Could not authenticate user.', {
@@ -13,9 +14,9 @@ module.exports = {
     // allows token to be sent via req.body, req.query, or headers
     let token = req.body.token || req.query.token || req.headers.authorization;
 
-    // ["Bearer", "<tokenvalue>"]
+    // If the authorization header exists, extract the token
     if (req.headers.authorization) {
-      token = token.split(' ').pop().trim();
+      token = req.headers.authorization.split(' ')[1]; // "Bearer <tokenvalue>"
     }
 
     if (!token) {
@@ -23,10 +24,15 @@ module.exports = {
     }
 
     try {
-      const { data } = jwt.verify(token, secret, { maxAge: expiration });
+      const { data } = jwt.verify(token, secret); 
       req.user = data;
-    } catch {
-      console.log('Invalid token');
+    } catch (err) {
+      console.log('Invalid token:', err.message);
+      throw new GraphQLError('Could not authenticate user.', {
+        extensions: {
+          code: 'UNAUTHENTICATED',
+        },
+      });
     }
 
     return req;
