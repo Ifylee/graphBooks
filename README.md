@@ -89,7 +89,6 @@ The tests cover:
 
 **To Run Test:**
 ```
-Bash
 npm test
 ```
 
