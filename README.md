@@ -23,6 +23,7 @@ GraphBook is a full-stack application that enables users to search for books usi
 - [Installation](#installation)
 - [Usage](#usage)
 - [Technologies](#technologies)
+- [Tests](#tests)
 - [License](#license)
 - [Contributing](#contributing)
 - [Questions](#questions)
@@ -74,6 +75,22 @@ GOOGLE_BOOKS_API_KEY=<your-google-books-api-key>
 **GraphQL & Apollo Server:** Replaces the RESTful API with GraphQL for   more efficient data querying.
 
 **JWT Authentication:** Secures user login and saved book data.
+
+## Tests
+I wrote automated tests with Jest and Supertest to make sure the GraphQL API works correctly.
+
+The tests cover:
+
+- Running the me query without logging in to see how it behaves.
+
+- Trying to save and remove books (saveBook and removeBook mutations) without authentication, to make sure errors or responses are handled properly.
+
+- Tested the GraphQL API’s schema to confirm it’s built correctly.
+
+**To Run**
+```
+npm test
+```
 
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
