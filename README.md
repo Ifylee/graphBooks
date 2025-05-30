@@ -87,8 +87,9 @@ The tests cover:
 
 - Tested the GraphQL API’s schema to confirm it’s built correctly.
 
-**To Run**
+**To Run Test:**
 ```
+Bash
 npm test
 ```
 
